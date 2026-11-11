@@ -1,0 +1,30 @@
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(190) NOT NULL UNIQUE,
+  name VARCHAR(120) NOT NULL,
+  password_hash VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) CHARACTER SET utf8mb4;
+
+ALTER TABLE cards
+  ADD COLUMN assignee_id INT NULL,
+  ADD CONSTRAINT fk_cards_assignee FOREIGN KEY (assignee_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE card_events
+  ADD CONSTRAINT fk_events_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+CREATE TABLE labels (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  board_id INT NOT NULL,
+  name VARCHAR(60) NOT NULL,
+  color VARCHAR(9) NOT NULL DEFAULT '#2f6fed',
+  CONSTRAINT fk_labels_board FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE
+) CHARACTER SET utf8mb4;
+
+CREATE TABLE card_labels (
+  card_id INT NOT NULL,
+  label_id INT NOT NULL,
+  PRIMARY KEY (card_id, label_id),
+  CONSTRAINT fk_cl_card FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE,
+  CONSTRAINT fk_cl_label FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE
+) CHARACTER SET utf8mb4;
