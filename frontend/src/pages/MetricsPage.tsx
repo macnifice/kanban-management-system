@@ -3,13 +3,7 @@ import { api } from '../api'
 import type { Metrics } from '../types'
 import { useToast } from '../components/Toast'
 import BoardTabs from '../components/BoardTabs'
-
-export function fmtDuration(hours: number): string {
-  if (hours < 1 / 60) return `${Math.round(hours * 3600)} s`
-  if (hours < 1) return `${Math.round(hours * 60)} min`
-  if (hours < 48) return `${hours.toFixed(1)} h`
-  return `${(hours / 24).toFixed(1)} d`
-}
+import { fmtDuration } from '../format'
 
 export default function MetricsPage({ id }: { id: number }) {
   const toast = useToast()
@@ -78,6 +72,7 @@ export default function MetricsPage({ id }: { id: number }) {
             <div className="tiles">
               <div className="tile"><span>Promedio</span><strong>{fmtDuration(m.cycle_time.avg_hours)}</strong></div>
               <div className="tile"><span>Mediana</span><strong>{fmtDuration(m.cycle_time.median_hours)}</strong></div>
+              <div className="tile"><span>Percentil 85</span><strong>{fmtDuration(m.cycle_time.p85_hours)}</strong></div>
               <div className="tile"><span>Tarjetas medidas</span><strong>{m.cycle_time.count}</strong></div>
             </div>
             <table className="metrics-table">

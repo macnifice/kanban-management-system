@@ -77,6 +77,7 @@ type CycleSampleView struct {
 type CycleTimeView struct {
 	AvgHours    float64           `json:"avg_hours"`
 	MedianHours float64           `json:"median_hours"`
+	P85Hours    float64           `json:"p85_hours"`
 	Count       int               `json:"count"`
 	Recent      []CycleSampleView `json:"recent"`
 }

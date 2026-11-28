@@ -145,3 +145,54 @@ func TestMedianEvenCount(t *testing.T) {
 		t.Fatalf("mediana = %v", st.Median)
 	}
 }
+
+func TestCycleTimeP85(t *testing.T) {
+	base := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	card := func(id, hours int) CompletedCard {
+		start := base
+		end := base.Add(time.Duration(hours) * time.Hour)
+		return CompletedCard{CardID: id, StartedAt: &start, FinishedAt: &end}
+	}
+
+	t.Run("diez tarjetas de 1 a 10 horas", func(t *testing.T) {
+		var cards []CompletedCard
+		for h := 10; h >= 1; h-- { // desordenadas a propósito
+			cards = append(cards, card(h, h))
+		}
+		// método del rango más cercano: ceil(0.85 * 10) = 9 → la novena duración
+		if got := ComputeCycleTime(cards, 5).P85; got != 9*time.Hour {
+			t.Fatalf("P85 = %v, esperaba 9h", got)
+		}
+	})
+
+	t.Run("veinte tarjetas: rango exacto", func(t *testing.T) {
+		var cards []CompletedCard
+		for h := 1; h <= 20; h++ {
+			cards = append(cards, card(h, h))
+		}
+		// 0.85 * 20 = 17 exacto → la duración 17, no la 18
+		if got := ComputeCycleTime(cards, 5).P85; got != 17*time.Hour {
+			t.Fatalf("P85 = %v, esperaba 17h", got)
+		}
+	})
+
+	t.Run("una sola tarjeta", func(t *testing.T) {
+		if got := ComputeCycleTime([]CompletedCard{card(1, 4)}, 5).P85; got != 4*time.Hour {
+			t.Fatalf("P85 = %v, esperaba 4h", got)
+		}
+	})
+
+	t.Run("sin tarjetas medibles", func(t *testing.T) {
+		if got := ComputeCycleTime(nil, 5).P85; got != 0 {
+			t.Fatalf("P85 = %v, esperaba 0", got)
+		}
+	})
+
+	t.Run("ignora tarjetas inválidas", func(t *testing.T) {
+		invalid := CompletedCard{CardID: 9, StartedAt: nil, FinishedAt: &base}
+		got := ComputeCycleTime([]CompletedCard{card(1, 2), invalid}, 5).P85
+		if got != 2*time.Hour {
+			t.Fatalf("P85 = %v, esperaba 2h", got)
+		}
+	})
+}

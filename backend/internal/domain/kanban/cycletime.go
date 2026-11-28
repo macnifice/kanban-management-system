@@ -1,6 +1,7 @@
 package kanban
 
 import (
+	"math"
 	"sort"
 	"time"
 )
@@ -24,6 +25,7 @@ type CycleTimeStats struct {
 	Count   int
 	Average time.Duration
 	Median  time.Duration
+	P85     time.Duration // 85 % de las tarjetas se terminó en este tiempo o menos
 	Recent  []CycleSample // las más recientemente terminadas primero
 }
 
@@ -58,9 +60,21 @@ func ComputeCycleTime(cards []CompletedCard, recentLimit int) CycleTimeStats {
 		st.Median = (ds[n/2-1] + ds[n/2]) / 2
 	}
 	st.Average = sum / time.Duration(n)
+	st.P85 = percentile(ds, 85)
 	sort.Slice(items, func(i, j int) bool { return items[i].finished.After(items[j].finished) })
 	for i := 0; i < len(items) && i < recentLimit; i++ {
 		st.Recent = append(st.Recent, items[i].CycleSample)
 	}
 	return st
+}
+
+// percentile devuelve el percentil p (0-100) de duraciones ya ordenadas, con el
+// método del rango más cercano: la duración en la posición ceil(p/100 * n).
+// Una lista vacía da 0.
+func percentile(sorted []time.Duration, p float64) time.Duration {
+	if len(sorted) == 0 {
+		return 0
+	}
+	rank := int(math.Ceil(p / 100 * float64(len(sorted))))
+	return sorted[rank-1]
 }

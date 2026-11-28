@@ -50,7 +50,7 @@ func (q *QueryService) Metrics(ctx context.Context, boardID int) (*MetricsView, 
 	}
 	st := domain.ComputeCycleTime(done, 10)
 	m.CycleTime = CycleTimeView{
-		AvgHours: hours(st.Average), MedianHours: hours(st.Median), Count: st.Count, Recent: []CycleSampleView{},
+		AvgHours: hours(st.Average), MedianHours: hours(st.Median), P85Hours: hours(st.P85), Count: st.Count, Recent: []CycleSampleView{},
 	}
 	for _, s := range st.Recent {
 		m.CycleTime.Recent = append(m.CycleTime.Recent, CycleSampleView{CardID: s.CardID, Title: s.Title, Hours: hours(s.Duration)})

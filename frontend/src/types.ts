@@ -65,6 +65,7 @@ export interface Metrics {
   cycle_time: {
     avg_hours: number
     median_hours: number
+    p85_hours: number
     count: number
     recent: { card_id: number; title: string; hours: number }[]
   }
